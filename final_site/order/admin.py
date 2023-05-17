@@ -15,7 +15,7 @@ class OrderItemAdmin(admin.ModelAdmin):
     search_fields = ('order__user__username', 'product__name')
     date_hierarchy = 'created_date'
 
-class PaymentAdmin(admin.ModelAdmin):
+class PaymentsAdmin(admin.ModelAdmin):
     list_display = ('order', 'amount', 'status', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('order__user__username', 'order__id')
@@ -26,4 +26,4 @@ class PaymentAdmin(admin.ModelAdmin):
 
 admin.site.register(Orderr,OrderAdmin)
 admin.site.register(OrderItem,OrderItemAdmin)
-admin.site.register(Payments,PaymentAdmin)
+admin.site.register(Payments,PaymentsAdmin)
