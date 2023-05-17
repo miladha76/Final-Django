@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
-    'ecomapp',
+    'user',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +70,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'final_site.wsgi.application'
+AUTH_USER_MODEL='user.User'
 
 
 # Database
@@ -78,7 +79,7 @@ WSGI_APPLICATION = 'final_site.wsgi.application'
 DATABASES = {
     'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'Final',
+    'NAME': 'online',
     'USER': 'postgres',
     'PASSWORD': 'miladmiladha76',
     'HOST': 'localhost',
