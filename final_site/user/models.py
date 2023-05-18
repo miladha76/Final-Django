@@ -21,7 +21,6 @@ class User(AbstractBaseUser):
     username = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
-    # address = models.ForeignKey('UserAddress', on_delete=models.CASCADE)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(null=True, blank=True)
     phone_number = models.CharField(max_length=20)
