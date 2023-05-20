@@ -11,7 +11,7 @@ class CustomUserAdmin(BaseUserAdmin):
     
     filter_horizontal=()
     list_filter=()
-    fieldsets=()
+    fieldsets=() 
 
 
 # Register the models with the respective admins
