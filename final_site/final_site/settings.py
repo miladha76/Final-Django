@@ -137,8 +137,18 @@ STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS= ['final_site\static']
 MEDIA_URL = "/media/"
 MEDIA_ROOT=BASE_DIR / "media"
-
+#jazzmin
+JAZZMIN_SETTINGS ={
+    "site_title": "Admin panel",
+    "welcome_sign": "Welcome to the maktab-admin",
+    "copyright": "maktabsharif",
+}
+JAZZMIN_UI_TWEAKS = {
+    
+    "theme": "slate",
+}
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
