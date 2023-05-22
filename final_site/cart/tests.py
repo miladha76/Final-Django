@@ -1,5 +1,5 @@
 from django.test import TestCase
-from user.models import User
+from accounts.models import Account
 from store.models import Product
 from category.models import Categories
 from discount.models import Discount
@@ -9,7 +9,7 @@ class CartModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         
-        cls.user = User.objects.create(username='testuser')
+        cls.user = Account.objects.create(username='testuser')
 
         
         cls.category = Categories.objects.create(cat_name='Test Category', slug='test-category')

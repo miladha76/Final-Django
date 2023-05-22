@@ -1,9 +1,9 @@
 from django.db import models
-from user.models import User
+from accounts.models import Account
 from store.models import Product,Variation
 
 class Payment(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    account = models.ForeignKey(Account,on_delete=models.CASCADE)
     payment_id = models.CharField(max_length=100)
     payment_method = models.CharField(max_length=100)
     amount_paid = models.CharField(max_length=100)
@@ -20,7 +20,7 @@ class Order(models.Model):
         ('Completed','Completed'),
         ('Cancelled','Cancelled'),
     )
-    user = models.ForeignKey(User ,on_delete=models.SET_NULL,null=True)
+    account = models.ForeignKey(Account ,on_delete=models.SET_NULL,null=True)
     payment =models.ForeignKey(Payment ,on_delete=models.SET_NULL,blank=True,null=True)
     order_number = models.CharField(max_length=50)
     first_name = models.CharField(max_length=50)
@@ -51,7 +51,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order=models.ForeignKey(Order,on_delete=models.CASCADE)
     payment= models.ForeignKey(Payment ,on_delete=models.SET_NULL,blank=True,null=True)
-    user = models.ForeignKey(User ,on_delete=models.CASCADE)
+    account = models.ForeignKey(Account ,on_delete=models.CASCADE)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     variations = models.ForeignKey(Variation ,on_delete=models.CASCADE)
     color = models.CharField(max_length=50)

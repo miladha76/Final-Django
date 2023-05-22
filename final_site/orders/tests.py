@@ -1,12 +1,12 @@
 from django.test import TestCase
-from user.models import User
+from accounts.models import Account
 from category.models import Categories
 from orders.models import Order, OrderItem, Payment
 from store.models import Product, Variation
 
 class OrderAppTest(TestCase):
     def setUp(self):
-        self.user = User.objects.create(username='testuser')
+        self.account = Account.objects.create(username='testuser')
 
         self.category = Categories.objects.create(
             cat_name='Test Category',
@@ -34,7 +34,7 @@ class OrderAppTest(TestCase):
         )
 
         self.order = Order.objects.create(
-            user=self.user,
+            account=self.account,
             first_name='milad',
             last_name='hatami',
             phone='123456789',
@@ -52,7 +52,7 @@ class OrderAppTest(TestCase):
         self.order_item = OrderItem.objects.create(
             order=self.order,
             payment=None,
-            user=self.user,  
+            account=self.account,  
             product=self.product,
             variations=self.variation,
             color='Red',
@@ -64,7 +64,7 @@ class OrderAppTest(TestCase):
 
         self.payment = Payment.objects.create(
             order=self.order,
-            user=self.user, 
+            account=self.account, 
             payment_id='1234567890',
             payment_method='Credit Card',
             amount_paid='10',
@@ -73,7 +73,7 @@ class OrderAppTest(TestCase):
 
 
     def test_order_creation(self):
-        self.assertEqual(self.order.user, self.user)
+        self.assertEqual(self.order.account, self.account)
         self.assertEqual(self.order.first_name, 'milad')
         self.assertEqual(self.order.last_name, 'hatami')
         self.assertEqual(self.order.phone, '123456789')
@@ -90,7 +90,7 @@ class OrderAppTest(TestCase):
     def test_order_item_creation(self):
         self.assertEqual(self.order_item.order, self.order)
         self.assertEqual(self.order_item.payment, None)
-        self.assertEqual(self.order_item.user, self.user)
+        self.assertEqual(self.order_item.account, self.account)
         self.assertEqual(self.order_item.product, self.product)
         self.assertEqual(self.order_item.variations, self.variation)
         self.assertEqual(self.order_item.color, 'Red')

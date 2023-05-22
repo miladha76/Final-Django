@@ -1,9 +1,9 @@
 from django.db import models
-from user.models import User
+from accounts.models import Account
 from store.models import Product
 
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     cart_no = models.CharField(max_length=255)
 

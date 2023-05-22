@@ -39,13 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
-    'user',
     'category',
     'store',
     'discount',
     'cart',
     'orders',
-    
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -78,7 +77,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'final_site.wsgi.application'
-AUTH_USER_MODEL='user.User'
+AUTH_USER_MODEL = 'accounts.Account'
 
 
 # Database
@@ -87,7 +86,7 @@ AUTH_USER_MODEL='user.User'
 DATABASES = {
     'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'online',
+    'NAME': 'new_django',
     'USER': 'postgres',
     'PASSWORD': 'miladmiladha76',
     'HOST': 'localhost',
