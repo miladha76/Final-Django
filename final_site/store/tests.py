@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import Product, Categories, Discount
+from .models import Product, Categories, Discount,Variation
 
 class ProductModelTest(TestCase):
     @classmethod
@@ -51,3 +51,28 @@ class ProductModelTest(TestCase):
     def test_product_modified_date_auto_now(self):
         product = Product.objects.get(id=self.product.id)
         self.assertIsNotNone(product.modified_date)
+
+    def test_variation_creation(self):
+        variation = Variation.objects.create(
+            product=self.product,
+            variation_category='color',
+            variation_value='Red',
+            is_active=True
+        )
+        
+        self.assertEqual(variation.product, self.product)
+        self.assertEqual(variation.variation_category, 'color')
+        self.assertEqual(variation.variation_value, 'Red')
+        self.assertTrue(variation.is_active)
+
+    def test_variation_str_representation(self):
+        variation = Variation.objects.create(
+            product=self.product,
+            variation_category='color',
+            variation_value='Red',
+            is_active=True
+        )
+        
+        variation_str = str(variation)
+        expected_str = 'Red'
+        self.assertEqual(variation_str, expected_str)
