@@ -1,6 +1,7 @@
 from django import forms
 from .models import Account
 
+
 class RegistrationForm(forms.ModelForm):
     password =forms.CharField(widget=forms.PasswordInput(attrs={
         'placeholder':'رمز را وارد کنید',
