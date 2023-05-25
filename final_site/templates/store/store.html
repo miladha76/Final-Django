@@ -29,12 +29,10 @@
                 <div class="card-body">
                     
                     <ul class="list-menu">
-                    <li><a href="#">تیشرت  </a></li>
-                    <li><a href="#">پیراهن </a></li>
-                    <li><a href="#">کفش  </a></li>
-                    <li><a href="#">جین  </a></li>
-                    <li><a href="#">کاپشن</a></li>
-                    <li><a href="#">جوراب</a></li>
+                        <li><a href="{%url 'store'%}">همه محصولات</a></li>
+                        {% for category in links  %}
+                            <li><a href="{{category.get_url}}">{{category.cat_name}}</a></li>
+                        {% endfor %}
                     
                     </ul>
     
@@ -88,25 +86,25 @@
                       <label>حداقل</label>
                       <!-- <input class="form-control" placeholder="$0" type="number"> -->
                           <select class="mr-2 form-control">
-                            <option value="0">$0</option>
-                            <option value="50">$50</option>
-                            <option value="100">$100</option>
-                            <option value="150">$150</option>
-                            <option value="200">$200</option>
-                            <option value="500">$500</option>
-                            <option value="1000">$1000</option>
+                            <option value="0"> تومان 0</option>
+                            <option value="50"> تومان50 </option>
+                            <option value="100"> تومان 100</option>
+                            <option value="150"> تومان 150</option>
+                            <option value="200"> تومان 200</option>
+                            <option value="500"> تومان 500</option>
+                            <option value="1000"> 1 میلبون تومان </option>
                         </select>
                     </div>
                     <div class="form-group text-right col-md-6">
                       <label>حداکثر</label>
                           <select class="mr-2 form-control">
-                            <option value="50">$50</option>
-                            <option value="100">$100</option>
-                            <option value="150">$150</option>
-                            <option value="200">$200</option>
-                            <option value="500">$500</option>
-                            <option value="1000">$1000</option>
-                            <option value="2000">$2000+</option>
+                            <option value="50"> تومان 50</option>
+                            <option value="100"> تومان 100</option>
+                            <option value="150"> تومان150</option>
+                            <option value="200"> تومان 200</option>
+                            <option value="500"> تومان 500</option>
+                            <option value="1000"> تومان 1000</option>
+                            <option value="2000"> تومان 2 میلبون+</option>
                         </select>
                     </div>
                     </div> <!-- form-row.// -->
@@ -133,14 +131,15 @@
             <figure class="card card-product-grid">
                 <div class="img-wrap"> 
                     
-                    <img src="{{product.images.url}}">
+                    <a href="{{product.get_url}}"><img src="{{product.images.url}}"></a>
                     
                 </div> <!-- img-wrap.// -->
                 <figcaption class="info-wrap">
                     <div class="fix-height">
-                        <a href="./product-detail.html" class="title">{{product.product_name}}</a>
+                        <a href="{{product.get_url}}" class="title">{{product.product_name}}</a>
                         <div class="price-wrap mt-2">
-                            <span class="price">{{product.price}}$</span>
+                            <span class="price">{{product.price}}</span>
+                            <span class="price-label">&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;</span>
                             
                         </div> <!-- price-wrap.// -->
                     </div>
