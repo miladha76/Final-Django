@@ -54,7 +54,8 @@ def login(request):
         user = auth.authenticate(email=email, password=password) 
         if user is not None:
             auth.login(request,user)
-            return redirect('home')
+            messages.success(request, 'شما وارد شدید')
+            return redirect('dashboard')
         else:
             messages.error(request, 'ورود انجام نشد')
             return redirect('login')  
@@ -83,3 +84,7 @@ def logout(request):
     auth.logout(request)
     messages.success(request, 'شما خارج شدید.')
     return redirect('login')
+
+@login_required(login_url = 'login')
+def dashboard(request):
+    return render(request, 'accounts/dashboard.html')
