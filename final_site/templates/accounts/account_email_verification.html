@@ -1,0 +1,11 @@
+
+{% autoescape off %}
+
+سلام {{user.first_name}},
+
+لطفاً بر روی لینک زیر کلیک کنید تا ثبت نام خود را تأیید کنید.
+http://{{domain}}{% url 'activate' uidb64=uid token=token %}
+
+اگر فکر می‌کنید که این شما نیستید، این ایمیل را نادیده بگیرید.
+
+{% endautoescape %}
