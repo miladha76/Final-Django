@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section-conten padding-y" style="min-height: 84vh">
+  <!-- ============================ COMPONENT OTP VERIFICATION ================================= -->
+  <div class="card mx-auto" style="max-width: 380px; margin-top: 100px;">
+    <div class="card-body">
+      <h4 class="card-title mb-4 text-right">تأیید OTP</h4>
+      {% include 'includes/alerts.html' %}
+      <form action="{% url 'otp_verification' %}" method="POST">
+        {% csrf_token %}
+        <p class="text-center">
+             به شماره تلفن همراه شما ارسال شده است. لطفاً کد را وارد کنید
+        </p>
+        <div class="form-group text-right">
+          <input type="text" class="form-control" placeholder="کد OTP" name="otp_code">
+        </div> <!-- form-group// -->
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary btn-block">تأیید</button>
+        </div> <!-- form-group// -->
+      </form>
+    </div> <!-- card-body.// -->
+  </div> <!-- card .// -->
+</section>
+{% endblock %}

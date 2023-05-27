@@ -11,6 +11,16 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from carts.models import Cart,CartItem
 from carts.views import _cart_id
+import redis
+import random
+from .utils import send_opt
+from django import views
+
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+def generate_otp():
+    """Generate a random 6-digit OTP code."""
+    return str(random.randint(100000, 999999))
 
 
 def register(request):
@@ -26,7 +36,9 @@ def register(request):
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
             user.phone_number = phone_number
             user.save()
-            
+           
+
+                       
             current_site = get_current_site(request)
             mail_subject = 'لطفاً حساب کاربری خود را فعال کنید'
             message = render_to_string('accounts/account_email_verification.html', {
@@ -55,7 +67,22 @@ def login(request):
 
         user = auth.authenticate(email=email, password=password) 
         if user is not None:
-        
+            otp_code = request.POST.get('otp_code')
+            if otp_code:
+                # Check if OTP code is valid
+                saved_otp = redis_client.get(user.username)
+                if saved_otp and otp_code == saved_otp.decode():
+                    # Delete OTP code from Redis after successful verification
+                    redis_client.delete(user.username)
+                else:
+                    messages.error(request, 'Invalid OTP code')
+                    return redirect('login')
+            else:
+                # Generate OTP code and store it in Redis
+                otp_code = generate_otp()
+                redis_client.setex(user.username, 300, otp_code)
+                send_opt(str(otp_code))
+                return render(request, 'accounts/otp_login.html')       
             try:
                 cart = Cart.objects.get(cart_id=_cart_id(request))
                 is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
@@ -129,3 +156,21 @@ def logout(request):
 @login_required(login_url = 'login')
 def dashboard(request):
     return render(request, 'accounts/dashboard.html')
+
+
+class OtploginView(views.View):
+    def get(self, request):
+        form = Otploginform()
+        return render(request, 'otp_login.html', {'form': form})
+
+    def post(self, request):
+        form = Otploginform(request.POST)
+        if form.is_valid():
+            r = redis.Redis(host='localhost', port=6379, db=0)
+            otp = request.session.get('username')
+            print(otp)
+            storedotp = r.get(otp).decode()
+            if form.cleaned_data['code'] == storedotp:
+                return redirect('/')
+
+        return redirect('otp')
