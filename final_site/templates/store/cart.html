@@ -67,8 +67,8 @@
                 </td>
                 <td>
                                     <div class="price-wrap">
-                                        <var class="price">$ {{ cart_item.sub_total }}</var>
-                                        <small class="text-muted"> $ {{ cart_item.product.price }} هر کدام </small>
+                                        <var class="price">تومان {{ cart_item.sub_total }}</var>
+                                        <small class="text-muted"> تومان {{ cart_item.product.price }} هر کدام </small>
                                     </div> <!-- price-wrap .// -->
                 </td>
                 <td class="text-right">
@@ -86,15 +86,15 @@
                     <div class="card-body">
                         <dl class="dlist-align">
                             <dt>قیمت کل:</dt>
-                            <dd class="text-right">$ {{total}}</dd>
+                            <dd class="text-right">تومان {{total}}</dd>
                         </dl>
                         <dl class="dlist-align">
                             <dt>مالیات:</dt>
-                            <dd class="text-right"> $ {{tax}}</dd>
+                            <dd class="text-right"> تومان {{tax}}</dd>
                         </dl>
                         <dl class="dlist-align">
                             <dt>جمع کل:</dt>
-                            <dd class="text-right text-dark b"><strong>$ {{grand_total}}</strong></dd>
+                            <dd class="text-right text-dark b"><strong>تومان {{grand_total}}</strong></dd>
                         </dl>
                         <hr>
                         <p class="text-center mb-3">

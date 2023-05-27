@@ -92,9 +92,7 @@ def add_cart(request, product_id):
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
         if is_cart_item_exists:
             cart_item = CartItem.objects.filter(product=product, cart=cart)
-            # existing_variations -> database
-            # current variation -> product_variation
-            # item_id -> database
+        
             ex_var_list = []
             id = []
             for item in cart_item:
