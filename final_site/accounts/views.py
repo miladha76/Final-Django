@@ -77,8 +77,7 @@ def login(request):
                         ex_var_list.append(list(existing_variation))
                         id.append(item.id)
 
-                    # product_variation = [1, 2, 3, 4, 6]
-                    # ex_var_list = [4, 6, 3, 5]
+                   
 
                     for pr in product_variation:
                         if pr in ex_var_list:
