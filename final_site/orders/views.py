@@ -2,15 +2,17 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse, JsonResponse
 from carts.models import Cart,CartItem
 from .forms import OrderForm
-from .models import Order,Payment
+from .models import Order,Payment,OrderItem
 import datetime
 import json
+from store.models import Product
 # Create your views here.
 
 def payments(request):
-    body = json .load(request.body)
+    body = json.loads(request.body)
     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-    
+
+    # Store transaction details inside Payment model
     payment = Payment(
         user = request.user,
         payment_id = body['transID'],
@@ -19,11 +21,35 @@ def payments(request):
         status = body['status'],
     )
     payment.save()
+
     order.payment = payment
     order.is_ordered = True
     order.save()
-    return render(request,'orders/payments.html')
 
+    # Move the cart items to Order Product table
+    cart_items = CartItem.objects.filter(user=request.user)
+
+    for item in cart_items:
+        orderproduct = OrderItem()
+        orderproduct.order_id = order.id
+        orderproduct.payment = payment
+        orderproduct.user_id = request.user.id
+        orderproduct.product_id = item.product_id
+        orderproduct.quantity = item.quantity
+        orderproduct.product_price = item.product.price
+        orderproduct.ordered = True
+        orderproduct.save()
+
+        cart_item = CartItem.objects.get(id=item.id)
+        product_variation = cart_item.variations.all()
+        orderproduct = OrderItem.objects.get(id=orderproduct.id)
+        orderproduct.variations.set(product_variation)
+        orderproduct.save()
+        
+        product = Product.objects.get(id=item.product_id)
+        product.stock -= item.quantity
+        product.save()
+    CartItem.objects.filter(user=request.user).delete()
 
 def place_order(request, total=0, quantity=0):
     current_user = request.user
@@ -61,13 +87,14 @@ def place_order(request, total=0, quantity=0):
             data.order_total = grand_total
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
+            data.save()
             
             yr = int(datetime.date.today().strftime('%Y'))
             dt = int(datetime.date.today().strftime('%d'))
             mt = int(datetime.date.today().strftime('%m'))
             d = datetime.date(yr,mt,dt)
             current_date = d.strftime("%Y%m%d")
-            order_number = current_date + str(data.id)
+            order_number = str(current_date) + str(data.id)
             data.order_number = order_number
             data.save()
             order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)

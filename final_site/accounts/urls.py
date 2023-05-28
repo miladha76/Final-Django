@@ -10,5 +10,6 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('otp_login/', Otplogin.as_view(), name='otp_login'),
+    path('my_orders/',views.my_orders,name='my_orders'),
    
 ]

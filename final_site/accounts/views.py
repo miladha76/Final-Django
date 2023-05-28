@@ -16,6 +16,7 @@ import random
 from .utils import send_opt
 from django import views
 from .forms import Otploginform
+from orders.models import Order
 import requests
 
 
@@ -163,7 +164,13 @@ def logout(request):
 
 @login_required(login_url = 'login')
 def dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    orders = Order.objects.order_by('-created_at').filter(user_id =request.user.id , is_ordered =True)
+    orders_count = orders.count()
+    
+    context ={
+        'orders_count':orders_count,
+    }
+    return render(request, 'accounts/dashboard.html',context)
 
 
 
@@ -183,3 +190,12 @@ class Otplogin(views.View):
                 return redirect('dashboard')
 
         return redirect('otp_login')
+
+
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user , is_ordered=True).order_by("-created_at")
+    context ={
+        'orders':orders,
+        
+    }
+    return render(request,'accounts/my_orders.html',context)
