@@ -1,5 +1,5 @@
 from django import forms
-from .models import Account
+from .models import Account,Otp
 
 
 class RegistrationForm(forms.ModelForm):
@@ -35,3 +35,7 @@ class RegistrationForm(forms.ModelForm):
             self.fields[field].widget.attrs['class'] = 'form-control'
             
 
+class Otploginform(forms.ModelForm):
+    class Meta:
+        model = Otp
+        fields = '__all__'

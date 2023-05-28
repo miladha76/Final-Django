@@ -15,13 +15,10 @@ import redis
 import random
 from .utils import send_opt
 from django import views
+from .forms import Otploginform
 import requests
 
-redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
-def generate_otp():
-    """Generate a random 6-digit OTP code."""
-    return str(random.randint(100000, 999999))
 
 
 def register(request):
@@ -65,6 +62,7 @@ def login(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
+        
 
         user = auth.authenticate(email=email, password=password)
 
@@ -111,16 +109,20 @@ def login(request):
 
             
             auth.login(request, user)
+            r = redis.Redis(host='localhost', port=6379, db=0)
+            otpcode = random.randint(100000, 999999)
+            r.setex(email, 40, str(otpcode)) 
+            request.session['email'] = email
+            send_opt(str(otpcode))
+            return redirect('otp_login')           
             messages.success(request, 'شما وارد شدید')
-            otp_code = generate_otp()  # Replace with your OTP code generation logic
+    
             
-            send_opt(otp_code)  # Call your send_otp method with the OTP code
 
-            # Store the received OTP and user details in the session for OTP verification
-            request.session['received_otp'] = otp_code
-            request.session['user_id'] = user.id
 
-            return redirect('otp_login')
+   
+
+            
             # url = request.META.get('HTTP_REFERER')
             # try:
             #     query = requests.utils.urlparse(url).query
@@ -132,7 +134,7 @@ def login(request):
             # except:
             #     return redirect('dashboard')
         else:
-            messages.error(request, 'Invalid login credentials')
+            messages.error(request, 'ورود خطا داشت')
             return redirect('login')
     return render(request, 'accounts/login.html')
 
@@ -165,18 +167,19 @@ def dashboard(request):
 
 
 
-def otp_login(request):
-    if request.method == 'POST':
-        otp = request.POST['otp']
-        received_otp = request.session.get('received_otp')
-        user_id = request.session.get('user_id')
+class Otplogin(views.View):
+    def get(self, request):
+        form = Otploginform()
+        return render(request, 'accounts/otp_login.html', {'form': form})
 
-        if otp == received_otp:
-            user = Account.objects.get(id=user_id)  # Retrieve the user based on user_id
-            auth.login(request, user)
-            messages.success(request, 'You are now logged in.')
-            return redirect('dashboard')
-        else:
-            messages.error(request, 'Invalid OTP')
-            return redirect('otp_login')
-    return render(request, 'accounts/otp_login.html')
+    def post(self, request):
+        form = Otploginform(request.POST)
+        if form.is_valid():
+            r = redis.Redis(host='localhost', port=6379, db=0)
+            otp = request.session.get('username')
+            print(otp)
+            storedotp = r.get(otp).decode()
+            if form.cleaned_data['code'] == storedotp:
+                return redirect('dashboard')
+
+        return redirect('otp_login')
