@@ -15,6 +15,7 @@ import redis
 import random
 from .utils import send_opt
 from django import views
+import requests
 
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
@@ -65,24 +66,9 @@ def login(request):
         email = request.POST['email']
         password = request.POST['password']
 
-        user = auth.authenticate(email=email, password=password) 
+        user = auth.authenticate(email=email, password=password)
+
         if user is not None:
-            otp_code = request.POST.get('otp_code')
-            if otp_code:
-                # Check if OTP code is valid
-                saved_otp = redis_client.get(user.username)
-                if saved_otp and otp_code == saved_otp.decode():
-                    # Delete OTP code from Redis after successful verification
-                    redis_client.delete(user.username)
-                else:
-                    messages.error(request, 'Invalid OTP code')
-                    return redirect('login')
-            else:
-                # Generate OTP code and store it in Redis
-                otp_code = generate_otp()
-                redis_client.setex(user.username, 300, otp_code)
-                send_opt(str(otp_code))
-                return render(request, 'accounts/otp_login.html')       
             try:
                 cart = Cart.objects.get(cart_id=_cart_id(request))
                 is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
@@ -104,7 +90,8 @@ def login(request):
                         ex_var_list.append(list(existing_variation))
                         id.append(item.id)
 
-                   
+                    # product_variation = [1, 2, 3, 4, 6]
+                    # ex_var_list = [4, 6, 3, 5]
 
                     for pr in product_variation:
                         if pr in ex_var_list:
@@ -121,14 +108,33 @@ def login(request):
                                 item.save()
             except:
                 pass
-            auth.login(request,user)
+
+            
+            auth.login(request, user)
             messages.success(request, 'شما وارد شدید')
-            return redirect('dashboard')
+            otp_code = generate_otp()  # Replace with your OTP code generation logic
+            
+            send_opt(otp_code)  # Call your send_otp method with the OTP code
+
+            # Store the received OTP and user details in the session for OTP verification
+            request.session['received_otp'] = otp_code
+            request.session['user_id'] = user.id
+
+            return redirect('otp_login')
+            # url = request.META.get('HTTP_REFERER')
+            # try:
+            #     query = requests.utils.urlparse(url).query
+            #     # next=/cart/checkout/
+            #     params = dict(x.split('=') for x in query.split('&'))
+            #     if 'next' in params:
+            #         nextPage = params['next']
+            #         return redirect(nextPage)                
+            # except:
+            #     return redirect('dashboard')
         else:
-            messages.error(request, 'ورود انجام نشد')
-            return redirect('login')  
-        
-    return render(request,'accounts/login.html')
+            messages.error(request, 'Invalid login credentials')
+            return redirect('login')
+    return render(request, 'accounts/login.html')
 
 def activate(request, uidb64, token):
     try:
@@ -158,19 +164,19 @@ def dashboard(request):
     return render(request, 'accounts/dashboard.html')
 
 
-class OtploginView(views.View):
-    def get(self, request):
-        form = Otploginform()
-        return render(request, 'otp_login.html', {'form': form})
 
-    def post(self, request):
-        form = Otploginform(request.POST)
-        if form.is_valid():
-            r = redis.Redis(host='localhost', port=6379, db=0)
-            otp = request.session.get('username')
-            print(otp)
-            storedotp = r.get(otp).decode()
-            if form.cleaned_data['code'] == storedotp:
-                return redirect('/')
+def otp_login(request):
+    if request.method == 'POST':
+        otp = request.POST['otp']
+        received_otp = request.session.get('received_otp')
+        user_id = request.session.get('user_id')
 
-        return redirect('otp')
+        if otp == received_otp:
+            user = Account.objects.get(id=user_id)  # Retrieve the user based on user_id
+            auth.login(request, user)
+            messages.success(request, 'You are now logged in.')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid OTP')
+            return redirect('otp_login')
+    return render(request, 'accounts/otp_login.html')
