@@ -3,7 +3,7 @@ from accounts.models import Account
 from store.models import Product,Variation
 
 class Payment(models.Model):
-    account = models.ForeignKey(Account,on_delete=models.CASCADE)
+    user = models.ForeignKey(Account,on_delete=models.CASCADE)
     payment_id = models.CharField(max_length=100)
     payment_method = models.CharField(max_length=100)
     amount_paid = models.CharField(max_length=100)
@@ -20,16 +20,18 @@ class Order(models.Model):
         ('Completed','Completed'),
         ('Cancelled','Cancelled'),
     )
-    account = models.ForeignKey(Account ,on_delete=models.SET_NULL,null=True)
+    user= models.ForeignKey(Account ,on_delete=models.SET_NULL,null=True)
     payment =models.ForeignKey(Payment ,on_delete=models.SET_NULL,blank=True,null=True)
     order_number = models.CharField(max_length=50)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    email = models.EmailField(max_length=50,blank=True)
     phone = models.CharField(max_length=11)
-    address_line1 =models.CharField(max_length=50)
-    address_line2 =models.CharField(max_length=50,blank=True)
+    address_line_1 =models.CharField(max_length=50)
+    address_line_2 =models.CharField(max_length=50,blank=True)
     country = models.CharField(max_length=50)
     city =models.CharField(max_length=50)
+    state = models.CharField(max_length=50,blank=True)
     order_note = models.CharField(max_length=100, blank=True)
     order_total = models.FloatField()
     status =models.CharField(max_length=10,choices=STATUS,default='New')
@@ -51,7 +53,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order=models.ForeignKey(Order,on_delete=models.CASCADE)
     payment= models.ForeignKey(Payment ,on_delete=models.SET_NULL,blank=True,null=True)
-    account = models.ForeignKey(Account ,on_delete=models.CASCADE)
+    user = models.ForeignKey(Account ,on_delete=models.CASCADE)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     variations = models.ForeignKey(Variation ,on_delete=models.CASCADE)
     color = models.CharField(max_length=50)
