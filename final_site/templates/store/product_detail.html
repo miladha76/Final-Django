@@ -64,12 +64,12 @@
                       {% if single_product.stock <= 0 %}
                         <h5 class="text-danger">اتمام موجودی</h5>
                       {% else %}
-                        <button type="submit" class="btn  btn-primary"> <span class="text">اضافه به کارت</span> <i class="fas fa-shopping-cart"></i>  </button>
+                   
+                      <button type="submit" class="btn  btn-primary"> <span class="text">اضافه به کارت</span> <i class="fas fa-shopping-cart"></i> </button>
                         <var class="price stock" style="display: block; margin-top: 1em;">{{single_product.stock}} :تعداد موجود</var>
+                        
 
-
-
-                        {% endif %}
+                       {% endif %}
                   </article> <!-- product-info-aside .// -->
                 </form>
             </main> <!-- col.// -->

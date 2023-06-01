@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'category',
     'store',
     'discount',
-    'cart',
+    'carts',
     'orders',
     'accounts',
 ]
@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'category.context_processors.menu_links',
+                'carts.context_processors.counter',
             ],
         },
     },
@@ -78,6 +79,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'final_site.wsgi.application'
 AUTH_USER_MODEL = 'accounts.Account'
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 
 
 # Database
@@ -144,7 +154,7 @@ JAZZMIN_SETTINGS ={
 }
 JAZZMIN_UI_TWEAKS = {
     
-    "theme": "slate",
+    "theme": "materia",
 }
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -155,3 +165,11 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+
+# SMTP configuration
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'django.milad@gmail.com'
+EMAIL_HOST_PASSWORD = 'veprkqxdfjpbjvaw'
+EMAIL_USE_TLS = True
