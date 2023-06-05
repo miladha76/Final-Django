@@ -33,9 +33,9 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/cart/', include(router.urls)),
     path('api/getcart',CartListCreateView.as_view(),name='cartlistcreate'),
-    path('api/add_cart/<int:product_id>/',add_cart,name='add_cart'),
-    path('api/remove_cart/<int:product_id>/<int:cart_item_id>/',remove_cart,name='remove_cart'),
-    path('api/remove_cart_item/<int:product_id>/<int:cart_item_id>/', views.remove_cart_item, name='remove_cart_item'),
+    path('api/add_cart/<int:product_id>/',add_cart,name='add_cartt'),
+    path('api/remove_cart/<int:product_id>/<int:cart_item_id>/',remove_cart,name='remove_cartt'),
+    path('api/remove_cart_item/<int:product_id>/<int:cart_item_id>/', views.remove_cart_item, name='remove_cart_iteem'),
     path('api/CartRetrieveUpdateDestroyView',CartRetrieveUpdateDestroyView.as_view(),name='CartRetrieveUpdateDestroyView'),
     path('api/CartItemRetrieveUpdateDestroyView',CartItemRetrieveUpdateDestroyView.as_view(),name='CartItemRetrieveUpdateDestroyView'),
   

@@ -80,7 +80,7 @@ $(document).ready(function() {
         
         // Make API request
         $.ajax({
-            url: "{% url 'api/edit_profile/' %}",
+            url: "{% url 'edit_profile' %}",
             type: "POST",
             data: formData,
             processData: false,
