@@ -1,6 +1,12 @@
 from django.urls import path
 from . import views
 from .views import Otplogin
+from .api_views import *
+from rest_framework import routers
+
+
+router = routers.DefaultRouter()
+router.register(r'UserProfileViewSet',UserProfileViewSet,basename='UserProfileViewSet')
 
 urlpatterns = [
     path('register/', views.register, name='register'),
@@ -13,6 +19,7 @@ urlpatterns = [
     path('my_orders/',views.my_orders,name='my_orders'),
     path('edit_profile/',views.edit_profile,name = 'edit_profile'),
     path('order_detail/<int:order_id>/',views.order_detail,name='order_detail'),
+    path('api/edit_profile/',UserProfileEditAPIView.as_view(),name='edit_profile'),
     
    
 ]
