@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'carts',
     'orders',
     'accounts',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +123,17 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        # Add any other authentication classes if needed
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        # Adjust permissions as required
+    ],
+}
 
 
 # Internationalization
