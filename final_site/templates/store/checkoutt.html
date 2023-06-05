@@ -147,7 +147,7 @@
             // Send POST request to API endpoint
             $.ajax({
                 type: 'POST',
-                url: '{% url 'place_order' %}',
+                url: '{% url 'api/place_order/' %}',
                 data: formData,
                 success: function(response) {
                     // Handle success response
