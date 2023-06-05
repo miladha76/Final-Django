@@ -17,7 +17,7 @@ import random
 from .utils import send_opt
 from django import views
 from .forms import Otploginform
-from orders.models import Order
+from orders.models import Order,OrderItem
 import requests
 
 
@@ -219,3 +219,19 @@ def edit_profile(request):
         'userprofile':userprofile,
         }
     return render(request , 'accounts/edit_profile.html',context)
+
+@login_required(login_url='login')
+def order_detail(request,order_id):
+    order_detail = OrderItem.objects.filter(order__order_number = order_id)
+    order= Order.objects.get(order_number = order_id)
+    subtotal=0
+    for i in order_detail:
+        subtotal += i.product_price * i.quantity
+        
+    context = {
+        "order_detail": order_detail,
+        'order':order ,
+        'subtotal': subtotal,
+        
+    }
+    return render(request,'accounts/order_detail.html')
