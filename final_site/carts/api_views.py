@@ -1,10 +1,17 @@
-from rest_framework import generics
+from rest_framework import generics,viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Cart, CartItem
 from .serializers import CartSerializer, CartItemSerializer
 from store.models import Product, Variation
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
+
+
+
+class CartViewSet(viewsets.ModelViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
 
 class CartListCreateView(generics.ListCreateAPIView):
     queryset = Cart.objects.all()
