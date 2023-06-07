@@ -15,7 +15,7 @@ def payments(request):
     # Store transaction details inside Payment model
     payment = Payment(
         user = request.user,
-        payment_id = body['transID'],
+        payment_id = '',
         payment_method = body['payment_method'],
         amount_paid = order.order_total,
         status = body['status'],
@@ -53,7 +53,6 @@ def payments(request):
     
     data = {
         'order_number': order.order_number,
-        'transID': payment.payment_id,
     }
     return JsonResponse(data)
 
@@ -121,19 +120,21 @@ def place_order(request, total=0, quantity=0):
         return redirect('checkout')
     
     
+from django.shortcuts import render, redirect
+from .models import Order, OrderItem, Payment
+
 def order_complete(request):
     order_number = request.GET.get('order_number')
-    transID = request.GET.get('payment_id')
 
     try:
         order = Order.objects.get(order_number=order_number, is_ordered=True)
         ordered_products = OrderItem.objects.filter(order_id=order.id)
 
         subtotal = 0
-        for i in ordered_products:
-            subtotal += i.product_price * i.quantity
+        for item in ordered_products:
+            subtotal += item.product_price * item.quantity
 
-        payment = Payment.objects.get(payment_id=transID)
+        payment = Payment.objects.get(order=order)
 
         context = {
             'order': order,

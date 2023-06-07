@@ -46,7 +46,7 @@
                                 <div class="well">
                                     <ul class="list-unstyled mb0">
                                         <li><strong>سفارش</strong> #{{order_number}}</li>
-                                        <li><strong>شناسه تراکنش</strong> {{transID}}</li>
+                                        <li><strong>شناسه تراکنش</strong>...</li>
                                         <li><strong>تاریخ سفارش:</strong> {{order.created_at}}</li>
                                         <li><strong>وضعیت:</strong> {{payment.status}}</li>
                                     </ul>
@@ -76,23 +76,23 @@
                                           				</p>
                                                 </td>
                                                 <td class="text-center">{{item.quantity}}</td>
-                                                <td class="text-center">{{item.product_price}} USD</td>
+                                                <td class="text-center">{{item.product_price}} تومان</td>
                                             </tr>
                                           {% endfor %}
                                         </tbody>
                                         <tfoot>
                                             <tr>
                                                 <th colspan="2" class="text-right">جمع کل:</th>
-                                                <th class="text-center">{{subtotal}} USD</th>
+                                                <th class="text-center">{{subtotal}} تومان</th>
                                             </tr>
                                             <tr>
                                                 <th colspan="2" class="text-right">مالیات:</th>
-                                                <th class="text-center">{{order.tax}} USD</th>
+                                                <th class="text-center">{{order.tax}} تومان</th>
                                             </tr>
 
                                             <tr>
                                                 <th colspan="2" class="text-right">جمع کل نهایی:</th>
-                                                <th class="text-center">{{order.order_total}} USD</th>
+                                                <th class="text-center">{{order.order_total}} تومان</th>
                                             </tr>
                                         </tfoot>
                                     </table>
