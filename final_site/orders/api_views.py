@@ -20,7 +20,7 @@ def payments(request):
         order = Order.objects.get(user=request.user, is_ordered=False, order_number=serializer.validated_data['orderID'])
         payment = Payment(
             user=request.user,
-            payment_id=serializer.validated_data['transID'],
+            payment_id=serializer.validated_data[''],
             payment_method=serializer.validated_data['payment_method'],
             amount_paid=order.order_total,
             status=serializer.validated_data['status']
@@ -48,7 +48,7 @@ def payments(request):
         cart_items.delete()
         data = {
             'order_number': order.order_number,
-            'transID': payment.payment_id
+           
         }
         return Response(data)
     else:
@@ -128,7 +128,6 @@ def order_complete(request):
             'order': order,
             'ordered_products': ordered_products,
             'order_number': order.order_number,
-            'transID': payment.payment_id,
             'payment': payment,
             'subtotal': subtotal
         }
