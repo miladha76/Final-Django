@@ -65,6 +65,8 @@ def product_detail(request, category_slug, product_slug):
 
 
 def search(request):
+    products = Product.objects.none()  # Initialize with an empty queryset
+    product_count = 0
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
         if keyword:
