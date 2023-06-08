@@ -17,7 +17,7 @@ import random
 from .utils import send_opt
 from django import views
 from .forms import Otploginform
-from orders.models import Order
+from orders.models import Order,OrderItem
 import requests
 
 
@@ -90,8 +90,7 @@ def login(request):
                         ex_var_list.append(list(existing_variation))
                         id.append(item.id)
 
-                    # product_variation = [1, 2, 3, 4, 6]
-                    # ex_var_list = [4, 6, 3, 5]
+                   
 
                     for pr in product_variation:
                         if pr in ex_var_list:
@@ -151,7 +150,7 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
         messages.success(request, 'تبریک می‌گوییم! حساب کاربری شما فعال شده است.')
-        return redirect('login')
+        return redirect('dashboard')
     else:
         messages.error(request, 'لینک فعال‌سازی نامعتبر است')
         return redirect('register')
@@ -167,9 +166,11 @@ def logout(request):
 def dashboard(request):
     orders = Order.objects.order_by('-created_at').filter(user_id =request.user.id , is_ordered =True)
     orders_count = orders.count()
+    userprofile = UserProfile.objects.get(user_id =request.user.id)
     
     context ={
         'orders_count':orders_count,
+        'userprofile':userprofile,
     }
     return render(request, 'accounts/dashboard.html',context)
 
@@ -192,7 +193,7 @@ class Otplogin(views.View):
 
         return redirect('otp_login')
 
-
+@login_required(login_url='login')
 def my_orders(request):
     orders = Order.objects.filter(user=request.user , is_ordered=True).order_by("-created_at")
     context ={
@@ -201,6 +202,8 @@ def my_orders(request):
     }
     return render(request,'accounts/my_orders.html',context)
 
+
+@login_required(login_url='login')
 def edit_profile(request):
     userprofile =get_object_or_404(UserProfile ,user =request.user)
     if request.method == 'POST':
@@ -220,3 +223,44 @@ def edit_profile(request):
         'userprofile':userprofile,
         }
     return render(request , 'accounts/edit_profile.html',context)
+
+@login_required(login_url='login')
+def order_detail(request,order_id):
+    order_detail = OrderItem.objects.filter(order__order_number = order_id)
+    order= Order.objects.get(order_number = order_id)
+    subtotal=0
+    for i in order_detail:
+        
+        subtotal += i.product_price * i.quantity
+        
+    context = {
+        
+        "order_detail": order_detail,
+        'order':order ,
+        'subtotal': subtotal,
+        
+    }
+    return render(request,'accounts/order_detail.html',context)
+@login_required(login_url='login')
+def change_password(request):
+    if request.method=='POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+        
+        user=Account.objects.get(username__exact=request.user.username)
+        
+        if new_password == confirm_password:
+            success = user.check_password(current_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                messages.success(request,'رمز با موفقیت تغییر کرد')
+                return redirect('change_password')
+            else:
+                messages.error(request,'رمز درست را وارد کنید')
+                return redirect('change_password')
+        else:
+            messages.error(request,'رمز مشابه نیست')
+            return redirect('change_password')
+    return render(request,'accounts/change_password.html')

@@ -8,7 +8,7 @@ class Categories(models.Model):
     cat_image=models.ImageField(upload_to='photos/categories',blank=True)
     
     def get_url(self):
-        return reverse('product_by_category',args=[self.slug])
+        return reverse('products_by_category',args=[self.slug])
     def __str__(self):
         return self.cat_name
     

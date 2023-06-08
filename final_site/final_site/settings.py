@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'carts',
     'orders',
     'accounts',
+    'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +124,17 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        # Add any other authentication classes if needed
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        # Adjust permissions as required
+    ],
+}
 
 
 # Internationalization
@@ -171,5 +184,5 @@ MESSAGE_TAGS = {
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'django.milad@gmail.com'
-EMAIL_HOST_PASSWORD = 'veprkqxdfjpbjvaw'
+EMAIL_HOST_PASSWORD = 'ucdfrvplctaaajki'
 EMAIL_USE_TLS = True

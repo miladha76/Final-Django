@@ -15,7 +15,7 @@ def payments(request):
     # Store transaction details inside Payment model
     payment = Payment(
         user = request.user,
-        payment_id = body['transID'],
+        payment_id = '',
         payment_method = body['payment_method'],
         amount_paid = order.order_total,
         status = body['status'],
@@ -50,11 +50,17 @@ def payments(request):
         product.stock -= item.quantity
         product.save()
     CartItem.objects.filter(user=request.user).delete()
+    
+    data = {
+        'order_number': order.order_number,
+    }
+    return JsonResponse(data)
+
 
 def place_order(request, total=0, quantity=0):
     current_user = request.user
 
-    # If the cart count is less than or equal to 0, then redirect back to shop
+    
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
     if cart_count <= 0:
@@ -108,7 +114,36 @@ def place_order(request, total=0, quantity=0):
             return render(request, 'orders/payments.html', context)
         else:
             print(form.errors)
-                # Handle the case when the form is not valid
+                
             return HttpResponse("Form is not valid")
     else:
         return redirect('checkout')
+    
+    
+from django.shortcuts import render, redirect
+from .models import Order, OrderItem, Payment
+
+def order_complete(request):
+    order_number = request.GET.get('order_number')
+
+    try:
+        order = Order.objects.get(order_number=order_number, is_ordered=True)
+        ordered_products = OrderItem.objects.filter(order_id=order.id)
+
+        subtotal = 0
+        for item in ordered_products:
+            subtotal += item.product_price * item.quantity
+
+        payment = Payment.objects.get(order=order)
+
+        context = {
+            'order': order,
+            'ordered_products': ordered_products,
+            'order_number': order.order_number,
+            'transID': payment.payment_id,
+            'payment': payment,
+            'subtotal': subtotal,
+        }
+        return render(request, 'orders/order_complete.html', context)
+    except (Payment.DoesNotExist, Order.DoesNotExist):
+        return redirect('home')
