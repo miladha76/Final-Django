@@ -188,24 +188,28 @@ def dashboard(request):
 
 def otplogin(request):
     if request.method == 'POST':
-        otp_code = request.POST['otp_code']
-        email = request.session.get('email')
+        form = Otploginform(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data['code']
+            email = request.session.get('email')
 
-        # Retrieve the OTP code from Redis
-        r = redis.Redis(host='localhost', port=6379, db=0)
-        saved_otp_code = r.get(email)
+            # Retrieve the OTP code from Redis
+            r = redis.Redis(host='localhost', port=6379, db=0)
+            saved_otp_code = r.get(email)
 
-        if saved_otp_code is not None and otp_code == saved_otp_code.decode():
-            # OTP code matches
-            user = Account.objects.get(email=email)
-            login(request, user)
-            r.delete(email)  # Delete the OTP code from Redis
-            return redirect('dashboard')
-        else:
-            messages.error(request, 'Invalid OTP code')
-            return redirect('otp_login')
+            if saved_otp_code is not None and otp_code == saved_otp_code.decode():
+                # OTP code matches
+                user = Account.objects.get(email=email)
+                auth.login(request, user)
+                r.delete(email)  # Delete the OTP code from Redis
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Invalid OTP code')
+                return redirect('otp_login')
+    else:
+        form = Otploginform()
 
-    return render(request, 'accounts/otp_login.html')
+    return render(request, 'accounts/otp_login.html', {'form': form})
 
 @login_required(login_url='login')
 def my_orders(request):
