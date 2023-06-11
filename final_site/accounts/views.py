@@ -19,6 +19,7 @@ from django import views
 from .forms import Otploginform
 from orders.models import Order,OrderItem
 import requests
+from django.core.mail import send_mail
 
 
 
@@ -59,7 +60,14 @@ def register(request):
     return render(request,'accounts/register.html',context)
 
 
+def send_otp_email(email, otp_code):
+    subject = 'Your OTP Code'
+    message = f'Your OTP code is: {otp_code}'
+    from_email = 'django.milad@gmail.com'  # Replace with your email address
 
+    send_email=EmailMessage(subject, message, from_email,to=[email])
+    send_email.send()
+    
 def login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -111,10 +119,10 @@ def login(request):
             
             auth.login(request, user)
             r = redis.Redis(host='localhost', port=6379, db=0)
-            otpcode = random.randint(100000, 999999)
-            r.setex(email, 40, str(otpcode)) 
+            otp_code = random.randint(100000, 999999)
+            r.setex(email, 40, str(otp_code)) 
             request.session['email'] = email
-            send_opt(str(otpcode))
+            send_otp_email(email, otp_code)
             return redirect('otp_login')           
             messages.success(request, 'شما وارد شدید')
     
@@ -176,22 +184,28 @@ def dashboard(request):
 
 
 
-class Otplogin(views.View):
-    def get(self, request):
-        form = Otploginform()
-        return render(request, 'accounts/otp_login.html', {'form': form})
 
-    def post(self, request):
-        form = Otploginform(request.POST)
-        if form.is_valid():
-            r = redis.Redis(host='localhost', port=6379, db=0)
-            otp = request.session.get('username')
-            print(otp)
-            storedotp = r.get(otp).decode()
-            if form.cleaned_data['code'] == storedotp:
-                return redirect('dashboard')
 
-        return redirect('otp_login')
+def otplogin(request):
+    if request.method == 'POST':
+        otp_code = request.POST['otp_code']
+        email = request.session.get('email')
+
+        # Retrieve the OTP code from Redis
+        r = redis.Redis(host='localhost', port=6379, db=0)
+        saved_otp_code = r.get(email)
+
+        if saved_otp_code is not None and otp_code == saved_otp_code.decode():
+            # OTP code matches
+            user = Account.objects.get(email=email)
+            login(request, user)
+            r.delete(email)  # Delete the OTP code from Redis
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid OTP code')
+            return redirect('otp_login')
+
+    return render(request, 'accounts/otp_login.html')
 
 @login_required(login_url='login')
 def my_orders(request):
