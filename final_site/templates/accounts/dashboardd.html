@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+{% include 'includes/alerts.html' %}
+<div class="container">
+	<div class="row">
+	{% include 'includes/dashboard_sidebar.html' %}
+	<main class="col-md-9">
+		<article class="card">
+		<header class="card-header">
+			<strong class="d-inline-block mr-3">وارد شده با نام :</strong>
+			<span id="user-name"></span>
+		</header>
+		<div class="card-body">
+			<div class="row">
+
+            <div class="col-md-6">
+                <div class="card" style="text-align:center;">
+                    <div class="card-body">
+                        <h5 class="card-title">کل سفارش ها</h5>
+                        <h4 id="orders-count"></h4>
+                        <a href="{% url 'my_orders' %}">دیدن سفارش ها</a>
+
+                    </div>					
+                </div> <!-- card.// -->
+            </div> <!-- col-md-6 .// -->
+
+            <div class="col-md-6">
+                <div class="card" style="text-align:center;">
+                    <div class="card-body">
+                        <img id="profile-picture" alt="user profile picture" width="50" height="50" style="border-radius:50%;">
+                        <p class="mb-0" id="user-email"></P>
+                        <p id="user-phone"></P>   
+
+                    </div>					
+                </div> <!-- card.// -->
+            </div> <!-- col-md-6 .// -->
+        
+		</article> <!-- card.// -->
+	</main>
+</div> <!-- row.// -->
+</div>
+
+
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // AJAX request to fetch dashboard data
+    $.ajax({
+        url: '/dashboard/',  // Replace with your API endpoint URL
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            // Update the DOM with the received data
+            $('#user-name').text(data.userprofile.user.first_name + ' ' + data.userprofile.user.last_name);
+            $('#orders-count').text(data.orders_count);
+            $('#profile-picture').attr('src', data.userprofile.profile_picture.url);
+            $('#user-email').text(data.userprofile.user.email);
+            $('#user-phone').text(data.userprofile.user.phone_number);
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log(xhr.responseText);
+        }
+    });
+});
+</script>
+
+{% endblock %}

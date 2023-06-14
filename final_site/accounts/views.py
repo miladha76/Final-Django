@@ -19,6 +19,7 @@ from django import views
 from .forms import Otploginform
 from orders.models import Order,OrderItem
 import requests
+from django.core.mail import send_mail
 
 
 
@@ -59,7 +60,14 @@ def register(request):
     return render(request,'accounts/register.html',context)
 
 
+def send_otp_email(email, otp_code):
+    subject = 'Your OTP Code'
+    message = f'Your OTP code is: {otp_code}'
+    from_email = 'django.milad@gmail.com'  # Replace with your email address
 
+    send_email=EmailMessage(subject, message, from_email,to=[email])
+    send_email.send()
+    
 def login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -107,14 +115,14 @@ def login(request):
                                 item.save()
             except:
                 pass
-
+               
             
             auth.login(request, user)
             r = redis.Redis(host='localhost', port=6379, db=0)
-            otpcode = random.randint(100000, 999999)
-            r.setex(email, 40, str(otpcode)) 
+            otp_code = random.randint(100000, 999999)
+            r.setex(email, 40, str(otp_code)) 
             request.session['email'] = email
-            send_opt(str(otpcode))
+            send_otp_email(email, otp_code)
             return redirect('otp_login')           
             messages.success(request, 'شما وارد شدید')
     
@@ -176,22 +184,33 @@ def dashboard(request):
 
 
 
-class Otplogin(views.View):
-    def get(self, request):
-        form = Otploginform()
-        return render(request, 'accounts/otp_login.html', {'form': form})
 
-    def post(self, request):
+
+def otplogin(request):
+    if request.method == 'POST':
         form = Otploginform(request.POST)
         if form.is_valid():
-            r = redis.Redis(host='localhost', port=6379, db=0)
-            otp = request.session.get('username')
-            print(otp)
-            storedotp = r.get(otp).decode()
-            if form.cleaned_data['code'] == storedotp:
-                return redirect('dashboard')
+            otp_code = form.cleaned_data['code']
+            email = request.session.get('email')
 
-        return redirect('otp_login')
+            # Retrieve the OTP code from Redis
+            r = redis.Redis(host='localhost', port=6379, db=0)
+            saved_otp_code = r.get(email)
+
+            if saved_otp_code is not None and otp_code == saved_otp_code.decode():
+                # OTP code matches
+                user = Account.objects.get(email=email)
+                auth.login(request, user)
+                r.delete(email)  # Delete the OTP code from Redis
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Invalid OTP code')
+                auth.logout(request)  # Logout the user
+                return redirect('login')
+    else:
+        form = Otploginform()
+
+    return render(request, 'accounts/otp_login.html', {'form': form})
 
 @login_required(login_url='login')
 def my_orders(request):
@@ -264,3 +283,65 @@ def change_password(request):
             messages.error(request,'رمز مشابه نیست')
             return redirect('change_password')
     return render(request,'accounts/change_password.html')
+
+
+def forgotPassword(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        if Account.objects.filter(email=email).exists():
+            user = Account.objects.get(email__exact=email)
+
+            # Reset password email
+            current_site = get_current_site(request)
+            mail_subject = 'بازیابی رمز'
+            message = render_to_string('accounts/reset_password_email.html', {
+                'user': user,
+                'domain': current_site,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            to_email = email
+            send_email = EmailMessage(mail_subject, message, to=[to_email])
+            send_email.send()
+
+            messages.success(request, 'ایمیل تنظیم مجدد رمز عبور به آدرس ایمیل شما ارسال شده است.')
+            return redirect('login')
+        else:
+            messages.error(request, 'حساب شما وجود ندارد')
+            return redirect('forgotPassword')
+    return render(request, 'accounts/forgotPassword.html')
+
+
+def resetpassword_validate(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = Account._default_manager.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, Account.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        request.session['uid'] = uid
+        messages.success(request, 'لطفاً رمز عبور خود را بازیابی کنید')
+        return redirect('resetPassword')
+    else:
+        messages.error(request, 'این لینک منقضی شده است!')
+        return redirect('login')
+
+
+def resetPassword(request):
+    if request.method == 'POST':
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+
+        if password == confirm_password:
+            uid = request.session.get('uid')
+            user = Account.objects.get(pk=uid)
+            user.set_password(password)
+            user.save()
+            messages.success(request, 'رمز با موفقیت تغییر کرد')
+            return redirect('login')
+        else:
+            messages.error(request, 'رمز ها مشابه نیست')
+            return redirect('resetPassword')
+    else:
+        return render(request, 'accounts/resetPassword.html')

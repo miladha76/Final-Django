@@ -7,6 +7,9 @@ import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets
 from .forms import *
+from rest_framework import status
+from datetime import date
+from carts.serializers import CartItemSerializer
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -72,44 +75,48 @@ def place_order(request):
     tax = (2 * total) / 100
     grand_total = total + tax
 
-    form = OrderForm(request.data)
-    if form.is_valid():
-        data = form.cleaned_data
-        order = Order.objects.create(
-            user=current_user,
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            phone=data['phone'],
-            email=data['email'],
-            address_line_1=data['address_line_1'],
-            address_line_2=data['address_line_2'],
-            country=data['country'],
-            city=data['city'],
-            order_note=data['order_note'],
-            order_total=grand_total,
-            tax=tax,
-            ip=request.META.get('REMOTE_ADDR')
-        )
-        yr = int(datetime.date.today().strftime('%Y'))
-        dt = int(datetime.date.today().strftime('%d'))
-        mt = int(datetime.date.today().strftime('%m'))
-        d = datetime.date(yr, mt, dt)
+    data = {
+        'user': current_user.id,
+        'first_name': request.data.get('first_name'),
+        'last_name': request.data.get('last_name'),
+        'phone': request.data.get('phone'),
+        'email': request.data.get('email'),
+        'address_line_1': request.data.get('address_line_1'),
+        'address_line_2': request.data.get('address_line_2'),
+        'country': request.data.get('country'),
+        'city': request.data.get('city'),
+        'order_note': request.data.get('order_note'),
+        'order_total': grand_total,
+        'tax': tax,
+        'ip': request.META.get('REMOTE_ADDR')
+    }
+
+    serializer = OrderSerializer(data=data)
+    if serializer.is_valid():
+        order = serializer.save()
+        yr = date.today().strftime('%Y')
+        dt = date.today().strftime('%d')
+        mt = date.today().strftime('%m')
+        d = date(int(yr), int(mt), int(dt))
         current_date = d.strftime("%Y%m%d")
-        order_number = str(current_date) + str(order.id)
+        order_number = current_date + str(order.id)
         order.order_number = order_number
         order.save()
+
+       
+        cart_items = CartItem.objects.filter(user=current_user)
+        serializer = CartItemSerializer(cart_items, many=True)
+
         context = {
             'order': order,
-            'cart_items': cart_items,
+            'cart_items': serializer.data,
             'total': total,
             'tax': tax,
             'grand_total': grand_total
         }
-        serializer = OrderSerializer(order)
-        return Response(serializer.data)
+        return Response(context, status=status.HTTP_201_CREATED)
     else:
-        return Response(form.errors, status=400)
-
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def order_complete(request):
