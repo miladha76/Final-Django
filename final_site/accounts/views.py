@@ -293,7 +293,7 @@ def forgotPassword(request):
 
             # Reset password email
             current_site = get_current_site(request)
-            mail_subject = 'Reset Your Password'
+            mail_subject = 'بازیابی رمز'
             message = render_to_string('accounts/reset_password_email.html', {
                 'user': user,
                 'domain': current_site,
@@ -304,10 +304,10 @@ def forgotPassword(request):
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
 
-            messages.success(request, 'Password reset email has been sent to your email address.')
+            messages.success(request, 'ایمیل تنظیم مجدد رمز عبور به آدرس ایمیل شما ارسال شده است.')
             return redirect('login')
         else:
-            messages.error(request, 'Account does not exist!')
+            messages.error(request, 'حساب شما وجود ندارد')
             return redirect('forgotPassword')
     return render(request, 'accounts/forgotPassword.html')
 
@@ -321,10 +321,10 @@ def resetpassword_validate(request, uidb64, token):
 
     if user is not None and default_token_generator.check_token(user, token):
         request.session['uid'] = uid
-        messages.success(request, 'Please reset your password')
+        messages.success(request, 'لطفاً رمز عبور خود را بازیابی کنید')
         return redirect('resetPassword')
     else:
-        messages.error(request, 'This link has been expired!')
+        messages.error(request, 'این لینک منقضی شده است!')
         return redirect('login')
 
 
@@ -338,10 +338,10 @@ def resetPassword(request):
             user = Account.objects.get(pk=uid)
             user.set_password(password)
             user.save()
-            messages.success(request, 'Password reset successful')
+            messages.success(request, 'رمز با موفقیت تغییر کرد')
             return redirect('login')
         else:
-            messages.error(request, 'Password do not match!')
+            messages.error(request, 'رمز ها مشابه نیست')
             return redirect('resetPassword')
     else:
         return render(request, 'accounts/resetPassword.html')
